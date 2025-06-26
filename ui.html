@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Content Swapper</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 16px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .section {
+      margin-bottom: 16px;
+    }
+    
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #000;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+      color: #333;
+      font-size: 11px;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #18a0fb;
+      box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.2);
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+  
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .primary {
+      background: #18a0fb;
+      color: white;
+    }
+    
+    .primary:hover {
+      background: #1492e6;
+    }
+    
+    .primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .secondary {
+      background: #f1f1f1;
+      color: #333;
+    }
+    
+    .secondary:hover {
+      background: #e6e6e6;
+    }
+    
+    .status {
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: none;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .status.success {
+      background: #e8f5e8;
+      color: #2d6a2d;
+      border: 1px solid #c3e6c3;
+    }
+    
+    .status.error {
+      background: #fdf2f2;
+      color: #c53030;
+      border: 1px solid #fed7d7;
+    }
+    
+    .status.info {
+      background: #ebf8ff;
+      color: #2c5aa0;
+      border: 1px solid #bee3f8;
+    }
+    
+    .status-dismiss-container {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+    }
+    
+    .status-dismiss {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 2px;
+      opacity: 0.7;
+      border-radius: 2px;
+    }
+    
+    .status-dismiss:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .data-preview {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #666;
+    }
+    
+    .info-box {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+    
+    .info-box h4 {
+      margin: 0 0 6px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .info-box p {
+      margin: 0 0 6px 0;
+      color: #6c757d;
+    }
+
+    .info-sec {
+      margin-top: 8px;
+      color: #6666;
+    }
+    
+    .info-box code {
+      background: #e9ecef;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 10px;
+    }
+    
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 16px;
+    }
+    
+    .tab-button {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: #666;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 0;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab-button:hover {
+      background: #f8f9fa;
+      color: #333;
+    }
+    
+    .tab-button.active {
+      color: #18a0fb;
+      border-bottom-color: #18a0fb;
+      background: transparent;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .placeholder-content {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .saved-data-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .saved-data-item {
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background: #fff;
+    }
+    
+    .saved-data-header {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      cursor: pointer;
+    }
+    
+    .saved-data-header:hover {
+      background: #f8f9fa;
+    }
+    
+    .dropdown-arrow {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #666;
+      transition: transform 0.2s ease;
+    }
+    
+    .dropdown-arrow.expanded {
+      transform: rotate(90deg);
+    }
+    
+    .saved-data-info {
+      flex: 1;
+    }
+    
+    .saved-data-name {
+      font-weight: 600;
+      font-size: 12px;
+      color: #333;
+      margin-bottom: 2px;
+    }
+    
+    .saved-data-details {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    .saved-data-rows {
+      display: none;
+      border-top: 1px solid #e9ecef;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .saved-data-rows.expanded {
+      display: block;
+    }
+    
+    .data-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid #f1f1f1;
+      font-size: 11px;
+    }
+    
+    .data-row:last-child {
+      border-bottom: none;
+    }
+    
+    .data-row:hover {
+      background: #f8f9fa;
+    }
+    
+    .data-row-content {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .data-field {
+      color: #666;
+    }
+    
+    .data-field strong {
+      color: #333;
+    }
+    
+    .saved-data-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .saved-data-actions button {
+      padding: 4px 8px;
+      font-size: 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    .apply-btn {
+      background: #18a0fb;
+      color: white;
+    }
+    
+    .apply-btn:hover {
+      background: #1492e6;
+    }
+    
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .delete-btn:hover {
+      background: #c82333;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+    
+ 
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-content h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .modal-content p {
+      margin: 0 0 12px 0;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    
+    .danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .danger:hover {
+      background: #c82333;
+    }
+    
+    .mapping-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 12px;
+      margin-bottom: 8px;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      background: #f8f9fa;
+      flex-wrap: wrap;
+    }
+    
+    .mapping-text {
+      
+      font-size: 12px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .mapping-text-content {
+      background: #fff;
+      padding: 6px 8px;
+      border-radius: 3px;
+      border: 1px solid #dee2e6;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 11px;
+      width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .mapping-arrow {
+      margin: 0 4px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .mapping-select {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+      background: white;
+      max-width: 130px
+    }
+    
+    .mapping-select:focus {
+      outline: none;
+      border-color: #18a0fb;
+      box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.2);
+    }
+    
+    .find-data-btn {
+      background: #28a745;
+      color: white;
+      font-size: 11px;
+      padding: 6px 12px;
+    }
+    
+    .find-data-btn:hover {
+      background: #218838;
+    }
+    
+    .find-data-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .mapping-modal-content {
+      position: fixed;
+      left: 24px;
+      right: 24px;
+      top: 24px;
+      bottom: 24px;
+      width: calc(100% - 48px);
+      height: calc(100% - 48px);
+      max-width: 372px;
+      max-height: 432px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    
+    .mapping-modal-header {
+      flex-shrink: 0;
+      margin-bottom: 16px;
+    }
+    
+    .mapping-modal-header h4 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .mapping-modal-header p {
+      margin: 0 0 8px 0;
+      font-size: 12px;
+    }
+    
+    .mapping-modal-description {
+      font-size: 11px;
+      color: #666;
+      margin: 0 0 16px 0;
+    }
+    
+    .mapping-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      min-height: 0;
+    }
+    
+    .mapping-modal-footer {
+      flex-shrink: 0;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h3>Content Swapper</h3>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button id="dataTab" class="tab-button active">Content</button>
+    <button id="addDataTab" class="tab-button">Add Data</button>
+    <button id="mapDataTab" class="tab-button">Map Data</button>
+    <button id="instructionsTab" class="tab-button">Instructions</button>
+  </div>
+
+  <!-- Content Tab -->
+  <div id="dataContent" class="tab-content active">
+    <div class="section">
+      <p style="margin: 0; font-size: 11px; color: #666;">
+        To update content, select a single frame or group or set of them and click Apply All. If you want to update using a single record, hit the dropdown and click Apply.
+      </p>
+      <p style="margin: 0; font-size: 11px; color: #666;">
+        ❗️ Ensure you layers use the {{fieldname}} format before trying to update.
+      </p>
+    </div>
+    
+    <div id="savedDataList" class="saved-data-list">
+      <div id="noDataMessage" class="placeholder-content">
+        <p style="text-align: center; color: #999; font-style: italic; margin: 40px 0;">
+          No datasets have been added. Go to Add Data to create your first dataset
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Data Tab -->
+  <div id="addDataContent" class="tab-content">
+    <div class="section">
+      <p style="margin: 0; font-size: 11px; color: #666;">
+        Paste spreadsheet, CSV, or JSON data to add to your saved datasets
+      </p>
+    </div>
+
+    <div class="section">
+              <label for="dataInput">Spreadsheet, CSV, or JSON Data:</label>
+        <textarea 
+          id="dataInput" 
+          placeholder="Paste your data here (auto-detected format)...&#10;&#10;Spreadsheet (copy from Excel/Google Sheets):&#10;Name	Location	Status&#10;Alice Smith	Springfield	Active&#10;Bob Johnson	Austin	Pending&#10;&#10;CSV Example:&#10;fullName,city,favoriteFruit&#10;Alice Smith,Springfield,Apple&#10;&#10;JSON Example:&#10;[{&quot;fullName&quot;:&quot;Alice Smith&quot;,&quot;city&quot;:&quot;Springfield&quot;}]"
+      ></textarea>
+      <div id="dataPreview" class="data-preview"></div>
+    </div>
+
+    <div class="button-group">
+      <button id="validateButton" class="secondary">Validate Data</button>
+      <button id="saveDataButton" class="secondary" disabled style="display: none;">Save Data</button>
+      <button id="processButton" class="primary" disabled>Process Data</button>
+    </div>
+  </div>
+
+  <!-- Map Data Tab -->
+  <div id="mapDataContent" class="tab-content">
+    <div class="section">
+      <p style="margin: 0; font-size: 11px; color: #666;">
+        Map text content to data fields and automatically update layer names to {{fieldname}} format
+      </p>
+    </div>
+    
+    <div id="mapDataList" class="saved-data-list">
+      <div id="noDataForMappingMessage" class="placeholder-content">
+        <p style="text-align: center; color: #999; font-style: italic; margin: 40px 0;">
+          No saved datasets available. Go to "Add Data" tab to create some first.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions Tab  -->
+  <div id="instructionsContent" class="tab-content">
+    <div class="info-box">
+      <h4>Step 1: Edit layer names</h4>
+      <p>Text layers must follow the format <code>{{layername}}</code></p>
+      <p>Example: <code>{{fullName}}</code>, <code>{{city}}</code>, <code>{{favoriteFruit}}</code></p>
+      <p class="info-sec">The layer name must match a field in your CSV, JSON or pasted data.</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>Step 2: Add data</h4>
+      <p>1. Go to "Add Data" tab and paste your spreadsheet, CSV, or JSON data</p>
+      <p>2. Click "Validate Data" to check your data</p>
+      <p>3. Click "Save Data" and add a name to save your dataset</p>
+      <p class="info-sec">You can also utilize data temporarily by clicking Process Data without saving to your datasets</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>Step 3: Map Data (Alternative)</h4>
+      <p>Use Map Data to automatically rename multiple layers to {{fieldname}} format:</p>
+      <p>1. Select objects containing text layers with existing names</p>
+      <p>2. Go to "Map Data" tab and click "Find Data" for your saved dataset</p>
+      <p>3. Map layer names to data fields (duplicates are grouped automatically)</p>
+      <p>4. Click "Map Data" to batch rename all selected layers</p>
+      <p class="info-sec">Perfect for components with duplicate layer names that need consistent field mapping</p>
+    </div>
+    
+    <div class="info-box">
+      <h4>Supported Data Formats</h4>
+      <p><strong>Spreadsheet:</strong> Copy directly from Excel or Google Sheets (tab-separated)</p>
+      <p><strong>CSV:</strong> Header row with field names, comma-separated values</p>
+      <p><strong>JSON:</strong> Array of objects with consistent field names</p>
+      <p class="info-sec">All formats are automatically detected and parsed.</p>
+    </div>
+  </div>
+
+ 
+
+  <div id="status" class="status"></div>
+
+  <!-- Save Data Modal -->
+  <div id="saveDataModal" class="modal">
+    <div class="modal-content">
+      <h4>Save Dataset</h4>
+      <p>Enter a name for this dataset:</p>
+      <input type="text" id="datasetName" placeholder="e.g., Employee List, Menu Items" maxlength="50">
+      <div class="modal-buttons">
+        <button id="cancelSave" class="secondary">Cancel</button>
+        <button id="confirmSave" class="primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <h4>Delete Dataset</h4>
+      <p>Are you sure you want to delete "<span id="deleteDatasetName"></span>"?</p>
+      <p style="color: #c53030; font-size: 11px;">This action cannot be undone.</p>
+      <div class="modal-buttons">
+        <button id="cancelDelete" class="secondary">Cancel</button>
+        <button id="confirmDelete" class="danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Data Modal -->
+  <div id="mapDataModal" class="modal">
+    <div class="mapping-modal-content">
+      <div class="mapping-modal-header">
+        <h4>Map Text to Data Fields</h4>
+        <p>Dataset: <strong id="mappingDatasetName"></strong></p>
+        <p class="mapping-modal-description">
+          Map the text content found in your selected layers to data fields. Layer names will be updated to {{fieldname}} format.
+        </p>
+      </div>
+      
+      <div id="mappingRows" class="mapping-modal-body">
+        <!-- Mapping rows will be populated here -->
+      </div>
+      
+      <div class="mapping-modal-footer">
+        <button id="cancelMapping" class="secondary">Cancel</button>
+        <button id="confirmMapping" class="primary">Map Data</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    console.log('🚀 All JavaScript inline - much simpler!');
+    
+    let validatedData = null;
+    let lastValidatedInput = '';
+    let savedDatasets = {};
+    const MAX_DATASETS = 5;
+    let currentMappingData = null;
+    
+    // Show status message
+    function showStatus(message, type = 'info') {
+      console.log(`📢 Showing status: [${type.toUpperCase()}] ${message}`);
+      const status = document.getElementById('status');
+      status.innerHTML = ''; // Clear previous content
+      status.className = `status ${type}`;
+      status.style.display = 'flex';
+      
+      // Add message text
+      const messageSpan = document.createElement('span');
+      messageSpan.textContent = message;
+      status.appendChild(messageSpan);
+      
+      // Add dismiss button for error messages
+      if (type === 'error') {
+        const dismissContainer = document.createElement('div');
+        dismissContainer.className = 'status-dismiss-container';
+        
+        const dismissBtn = document.createElement('button');
+        dismissBtn.className = 'status-dismiss';
+        dismissBtn.innerHTML = '×';
+        dismissBtn.title = 'Dismiss';
+        dismissBtn.onclick = () => {
+          status.style.display = 'none';
+        };
+        
+        dismissContainer.appendChild(dismissBtn);
+        status.appendChild(dismissContainer);
+      }
+      
+      // Auto-hide success and info messages
+      if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 3000);
+      }
+    }
+    
+    // Parse CSV/TSV data into array of objects
+    function parseDelimitedData(text, delimiter = ',') {
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) {
+        throw new Error('Data must have at least a header row and one data row');
+      }
+      
+      // Get headers from first line
+      const headers = lines[0].split(delimiter).map(header => header.trim().replace(/"/g, ''));
+      
+      // Parse data rows
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(delimiter).map(value => value.trim().replace(/"/g, ''));
+        
+        if (values.length !== headers.length) {
+          throw new Error(`Row ${i + 1} has ${values.length} columns, expected ${headers.length}`);
+        }
+        
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index];
+        });
+        data.push(row);
+      }
+      
+      return data;
+    }
+    
+    // Detect if input is JSON, CSV, or TSV
+    function detectDataFormat(input) {
+      const trimmed = input.trim();
+      
+      // Check if it starts with [ or { (JSON)
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        return 'json';
+      }
+      
+      // Check for tab-separated values (TSV) - from spreadsheet copy/paste
+      if (trimmed.includes('\t') && trimmed.includes('\n')) {
+        return 'tsv';
+      }
+      
+      // Check if it has comma-separated values (CSV)
+      if (trimmed.includes(',') && trimmed.includes('\n')) {
+        return 'csv';
+      }
+      
+      // Default to JSON for backward compatibility
+      return 'json';
+    }
+    
+    // Validate CSV or JSON input
+    function validateData() {
+      console.log('📝 validateData() function called');
+      const dataInput = document.getElementById('dataInput');
+      const input = dataInput.value.trim();
+      console.log('📄 Input length:', input.length);
+      
+      if (!input) {
+        console.log('❌ No input provided');
+        showStatus('Please enter spreadsheet, CSV, or JSON data', 'error');
+        return false;
+      }
+      
+      try {
+        const format = detectDataFormat(input);
+        console.log('🔍 Detected format:', format.toUpperCase());
+        
+        let parsed;
+        
+        if (format === 'csv') {
+          console.log('🔄 Attempting to parse CSV...');
+          parsed = parseDelimitedData(input, ',');
+          console.log('✅ CSV parsed successfully');
+        } else if (format === 'tsv') {
+          console.log('🔄 Attempting to parse TSV (spreadsheet data)...');
+          parsed = parseDelimitedData(input, '\t');
+          console.log('✅ TSV parsed successfully');
+        } else {
+          console.log('🔄 Attempting to parse JSON...');
+          parsed = JSON.parse(input);
+          console.log('✅ JSON parsed successfully');
+          
+          if (!Array.isArray(parsed)) {
+            console.log('❌ Parsed JSON is not an array');
+            showStatus('JSON must be an array of objects', 'error');
+            return false;
+          }
+        }
+        
+        if (parsed.length === 0) {
+          console.log('❌ Data array is empty');
+          showStatus('Data cannot be empty', 'error');
+          return false;
+        }
+        
+        // Check if all items are objects
+        const allObjects = parsed.every(item => 
+          typeof item === 'object' && item !== null && !Array.isArray(item)
+        );
+        
+        if (!allObjects) {
+          console.log('❌ Not all items are objects');
+          showStatus('All data items must be objects', 'error');
+          return false;
+        }
+        
+        validatedData = parsed;
+        lastValidatedInput = input; // Store the input that was validated
+        document.getElementById('processButton').disabled = false;
+        
+        // Show Save Data button if under dataset limit
+        const saveButton = document.getElementById('saveDataButton');
+        if (Object.keys(savedDatasets).length < MAX_DATASETS) {
+          saveButton.style.display = 'inline-block';
+          saveButton.disabled = false;
+        } else {
+          saveButton.style.display = 'none';
+        }
+        
+        // Update preview using flattened field paths
+        const fieldPaths = getAllFieldPaths(parsed);
+        document.getElementById('dataPreview').textContent = 
+          `${parsed.length} items found (${format.toUpperCase()})`;
+        
+        showStatus(`${format.toUpperCase()} data is valid!`, 'success');
+        console.log('🎉 Validation completed successfully!');
+        return true;
+        
+      } catch (error) {
+        console.log('💥 Parsing failed:', error.message);
+        showStatus(`Invalid data: ${error.message}`, 'error');
+        clearValidatedData();
+        return false;
+      }
+    }
+    
+    // Clear validated data and reset UI state
+    function clearValidatedData() {
+      validatedData = null;
+      lastValidatedInput = '';
+      document.getElementById('processButton').disabled = true;
+      document.getElementById('saveDataButton').style.display = 'none';
+      document.getElementById('dataPreview').textContent = '';
+    }
+    
+    // Check if current input matches validated data
+    function isInputValidated() {
+      const currentInput = document.getElementById('dataInput').value.trim();
+      return validatedData !== null && currentInput === lastValidatedInput;
+    }
+    
+    // Flatten nested objects and arrays to create field paths
+    function flattenObject(obj, prefix = '', result = {}) {
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const newKey = prefix ? `${prefix}.${key}` : key;
+          const value = obj[key];
+          
+          if (Array.isArray(value)) {
+            // For arrays, create paths for each index
+            value.forEach((item, index) => {
+              if (typeof item === 'object' && item !== null) {
+                flattenObject(item, `${newKey}[${index}]`, result);
+              } else {
+                result[`${newKey}[${index}]`] = item;
+              }
+            });
+          } else if (typeof value === 'object' && value !== null) {
+            // For nested objects, recurse
+            flattenObject(value, newKey, result);
+          } else {
+            // For primitive values, add directly
+            result[newKey] = value;
+          }
+        }
+      }
+      return result;
+    }
+    
+    // Get all possible field paths from a dataset
+    function getAllFieldPaths(data) {
+      const allPaths = new Set();
+      
+      // Flatten each item in the dataset to collect all possible paths
+      data.forEach(item => {
+        const flattened = flattenObject(item);
+        Object.keys(flattened).forEach(path => allPaths.add(path));
+      });
+      
+      return Array.from(allPaths).sort();
+    }
+    
+    // Get unique property names for mapping (preserves original order, extracts nested properties)
+    function getUniquePropertyNames(data) {
+      if (!data || data.length === 0) return [];
+      
+      const uniqueProps = new Set();
+      const orderedProps = [];
+      
+      // Helper function to extract property names from nested structures
+      function extractPropertyNames(obj) {
+        Object.keys(obj).forEach(key => {
+          const value = obj[key];
+          
+          if (Array.isArray(value) && value.length > 0) {
+            // For arrays, extract properties from the first item
+            const firstItem = value[0];
+            if (typeof firstItem === 'object' && firstItem !== null) {
+              // Add the nested properties, not the array key itself
+              Object.keys(firstItem).forEach(nestedKey => {
+                if (!uniqueProps.has(nestedKey)) {
+                  uniqueProps.add(nestedKey);
+                  orderedProps.push(nestedKey);
+                }
+              });
+            }
+          } else if (typeof value === 'object' && value !== null) {
+            // For nested objects, extract their properties
+            Object.keys(value).forEach(nestedKey => {
+              if (!uniqueProps.has(nestedKey)) {
+                uniqueProps.add(nestedKey);
+                orderedProps.push(nestedKey);
+              }
+            });
+          } else {
+            // For primitive values, add the key itself
+            if (!uniqueProps.has(key)) {
+              uniqueProps.add(key);
+              orderedProps.push(key);
+            }
+          }
+        });
+      }
+      
+      // Process all data items to collect all possible property names
+      data.forEach(item => {
+        extractPropertyNames(item);
+      });
+      
+      return orderedProps;
+    }
+    
+    // Transform data using field path to get nested values
+    function getValueByPath(obj, path) {
+      // Handle array notation like experience[0].job_title
+      const parts = path.split(/[\.\[\]]+/).filter(Boolean);
+      let current = obj;
+      
+      for (const part of parts) {
+        if (current === null || current === undefined) {
+          return '';
+        }
+        
+        // Check if part is a number (array index)
+        if (/^\d+$/.test(part)) {
+          const index = parseInt(part);
+          if (Array.isArray(current) && index < current.length) {
+            current = current[index];
+          } else {
+            return '';
+          }
+        } else {
+          current = current[part];
+        }
+      }
+      
+      return current !== null && current !== undefined ? String(current) : '';
+    }
+    
+    // Load saved datasets from plugin storage
+    function loadSavedDatasets() {
+      parent.postMessage({
+        pluginMessage: { type: 'load-datasets' }
+      }, '*');
+    }
+    
+    // Save dataset with name
+    function saveDataset(name, data) {
+      parent.postMessage({
+        pluginMessage: { 
+          type: 'save-dataset',
+          name: name,
+          data: data
+        }
+      }, '*');
+    }
+    
+    // Delete dataset
+    function deleteDataset(name) {
+      parent.postMessage({
+        pluginMessage: { 
+          type: 'delete-dataset',
+          name: name
+        }
+      }, '*');
+    }
+    
+    // Apply dataset to selected objects
+    function applyDataset(data) {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'process-content-swap',
+          data: data
+        }
+      }, '*');
+    }
+    
+    // Apply single row of data to selected objects
+    function applySingleRow(rowData) {
+      parent.postMessage({
+        pluginMessage: {
+          type: 'process-content-swap',
+          data: [rowData] // Wrap single row in array
+        }
+      }, '*');
+    }
+    
+    // Find text data in selected Figma objects for mapping
+    function findTextDataForMapping(datasetName) {
+      console.log('Finding text data for dataset:', datasetName);
+      parent.postMessage({
+        pluginMessage: {
+          type: 'find-text-for-mapping',
+          datasetName: datasetName
+        }
+      }, '*');
+    }
+    
+    // Show mapping modal with found layer names and dataset fields
+    function showMappingModal(datasetName, layerItems, datasetFields) {
+      currentMappingData = {
+        datasetName: datasetName,
+        layerItems: layerItems,
+        datasetFields: datasetFields
+      };
+      
+      document.getElementById('mappingDatasetName').textContent = datasetName;
+      
+      const mappingRows = document.getElementById('mappingRows');
+      mappingRows.innerHTML = '';
+      
+      // Group layer items by type (patterns vs individual)
+      const patternItems = layerItems.filter(item => item.type === 'pattern');
+      const individualItems = layerItems.filter(item => item.type === 'individual');
+      
+      // Show patterns first
+      if (patternItems.length > 0) {
+        // Group pattern items by pattern index
+        const patternGroups = new Map();
+        patternItems.forEach(item => {
+          const key = item.patternIndex;
+          if (!patternGroups.has(key)) {
+            patternGroups.set(key, []);
+          }
+          patternGroups.get(key).push(item);
+        });
+        
+        // Add a header for patterns
+        if (patternGroups.size > 0) {
+          const header = document.createElement('div');
+          header.style.cssText = 'font-weight: 600; font-size: 11px; color: #666; margin: 16px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #e9ecef;';
+          header.textContent = '📋 Layout Patterns';
+          mappingRows.appendChild(header);
+        }
+        
+        patternGroups.forEach((items, patternIndex) => {
+          const firstItem = items[0];
+          
+          // Add pattern group header
+          const patternHeader = document.createElement('div');
+          patternHeader.style.cssText = 'font-size: 10px; color: #888; margin: 8px 0 4px 0; font-style: italic;';
+          patternHeader.textContent = `We found these similar layers (${firstItem.patternSize} instances)`;
+          mappingRows.appendChild(patternHeader);
+          
+          // Add each text field in this pattern
+          items.forEach((layerItem, index) => {
+            const row = document.createElement('div');
+            row.className = 'mapping-row';
+
+            
+            // Create dropdown options
+            let options = '<option value=""> Skip this layer </option>';
+            datasetFields.forEach(field => {
+              options += `<option value="${field}">${field}</option>`;
+            });
+            
+            // Display layer name with examples
+            const examples = layerItem.examples && layerItem.examples.length > 0 
+              ? `(e.g., ${layerItem.examples.join(', ')})`
+              : '';
+            
+            row.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="mapping-text">
+                  <div class="mapping-text-content" title="${layerItem.layerName}">${layerItem.layerName}</div>
+              </div>
+              <div class="mapping-arrow">→</div>
+              <select class="mapping-select" data-layer-index="${layerItems.indexOf(layerItem)}">
+                ${options}
+              </select>
+              </div>
+              ${examples ? `<div style="width: 100%; font-size: 9px; color: #999; margin-top: 4px;">${examples}</div>` : ''}
+            `;
+            
+            mappingRows.appendChild(row);
+          });
+        });
+      }
+      
+      // Show individual items
+      if (individualItems.length > 0) {
+        // Add header for individual items
+        if (patternItems.length > 0) {
+          const header = document.createElement('div');
+          header.style.cssText = 'font-weight: 600; font-size: 11px; color: #666; margin: 16px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #e9ecef;';
+          header.textContent = '📝 Individual objects';
+          mappingRows.appendChild(header);
+        }
+        
+        individualItems.forEach((layerItem, index) => {
+          const row = document.createElement('div');
+          row.className = 'mapping-row';
+          
+          // Create dropdown options
+          let options = '<option value=""> Skip this layer </option>';
+          datasetFields.forEach(field => {
+            options += `<option value="${field}">${field}</option>`;
+          });
+          
+          // Display layer name with count if multiple instances
+          const countInfo = layerItem.count > 1 
+            ? `(${layerItem.count} instances)`
+            : '';
+          
+          row.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="mapping-text">
+                <div class="mapping-text-content" title="${layerItem.layerName}">${layerItem.layerName}</div>
+            </div>
+            <div class="mapping-arrow">→</div>
+            <select class="mapping-select" data-layer-index="${layerItems.indexOf(layerItem)}">
+              ${options}
+            </select>
+            </div>
+            ${countInfo ? `<div style="width: 100%; font-size: 9px; color: #999; margin-top: 4px;">${countInfo}</div>` : ''}
+          `;
+          
+          mappingRows.appendChild(row);
+        });
+      }
+      
+      document.getElementById('mapDataModal').style.display = 'block';
+    }
+    
+    // Hide mapping modal
+    function hideMappingModal() {
+      document.getElementById('mapDataModal').style.display = 'none';
+      currentMappingData = null;
+    }
+    
+    // Process the mapping and update layer names
+    function processMapping() {
+      if (!currentMappingData) return;
+      
+      const mappings = [];
+      const selects = document.querySelectorAll('.mapping-select');
+      
+      selects.forEach(select => {
+        const layerIndex = parseInt(select.dataset.layerIndex);
+        const fieldName = select.value;
+        
+        if (fieldName) { // Only process non-skipped mappings
+          mappings.push({
+            layerItem: currentMappingData.layerItems[layerIndex],
+            fieldName: fieldName
+          });
+        }
+      });
+      
+      if (mappings.length === 0) {
+        showStatus('No mappings selected', 'error');
+        return;
+      }
+      
+      // Send mapping data to plugin
+      parent.postMessage({
+        pluginMessage: {
+          type: 'process-text-mapping',
+          mappings: mappings
+        }
+      }, '*');
+      
+      hideMappingModal();
+    }
+    
+    // Toggle dropdown for dataset
+    function toggleDatasetDropdown(datasetName) {
+      const item = document.querySelector(`[data-dataset="${datasetName}"]`);
+      const arrow = item.querySelector('.dropdown-arrow');
+      const rows = item.querySelector('.saved-data-rows');
+      
+      const isExpanded = rows.classList.contains('expanded');
+      
+      if (isExpanded) {
+        arrow.classList.remove('expanded');
+        rows.classList.remove('expanded');
+      } else {
+        arrow.classList.add('expanded');
+        rows.classList.add('expanded');
+      }
+    }
+    
+    // Get count of unique property names from dataset
+    function getUniquePropertyCount(data) {
+      if (!data || data.length === 0) return 0;
+      
+      const allPaths = getAllFieldPaths(data);
+      const uniqueProperties = new Set();
+      
+      // Extract just the property names without array indices
+      allPaths.forEach(path => {
+        // Remove array indices to get unique property names
+        // e.g., "experience[0].job_title" becomes "job_title"
+        const cleanPath = path.replace(/\[\d+\]/g, '').split('.').pop();
+        uniqueProperties.add(cleanPath);
+      });
+      
+      return uniqueProperties.size;
+    }
+    
+    // Render saved datasets in Map Data tab
+    function renderMappingDatasets() {
+      const listContainer = document.getElementById('mapDataList');
+      const noDataMessage = document.getElementById('noDataForMappingMessage');
+      
+      if (Object.keys(savedDatasets).length === 0) {
+        noDataMessage.style.display = 'block';
+        return;
+      }
+      
+      noDataMessage.style.display = 'none';
+      
+      // Clear existing items (keep noDataMessage)
+      const existingItems = listContainer.querySelectorAll('.saved-data-item');
+      existingItems.forEach(item => item.remove());
+      
+      // Create items for each dataset (for mapping)
+      Object.entries(savedDatasets).forEach(([name, dataset]) => {
+        const item = document.createElement('div');
+        item.className = 'saved-data-item';
+        
+        const keys = dataset.data.length > 0 ? getAllFieldPaths(dataset.data) : [];
+        
+        // Create simple header for mapping
+        const header = document.createElement('div');
+        header.className = 'saved-data-header';
+        header.style.cursor = 'default';
+        
+        header.innerHTML = `
+          <div style="width: 16px;"></div>
+          <div class="saved-data-info">
+            <div class="saved-data-name">${name}</div>
+            <div class="saved-data-details">${dataset.data.length} records, ${getUniquePropertyCount(dataset.data)} properties</div>
+          </div>
+          <div class="saved-data-actions">
+            <button class="find-data-btn" onclick="findTextDataForMapping('${name}')">Find Data</button>
+          </div>
+        `;
+        
+        item.appendChild(header);
+        listContainer.appendChild(item);
+      });
+    }
+    
+    // Render saved datasets in Data tab
+    function renderSavedDatasets() {
+      const listContainer = document.getElementById('savedDataList');
+      const noDataMessage = document.getElementById('noDataMessage');
+      
+      // Clear existing items (keep noDataMessage) - do this BEFORE checking if empty
+      const existingItems = listContainer.querySelectorAll('.saved-data-item');
+      existingItems.forEach(item => item.remove());
+      
+      if (Object.keys(savedDatasets).length === 0) {
+        noDataMessage.style.display = 'block';
+        return;
+      }
+      
+      noDataMessage.style.display = 'none';
+      
+      // Create items for each dataset
+      Object.entries(savedDatasets).forEach(([name, dataset]) => {
+        const item = document.createElement('div');
+        item.className = 'saved-data-item';
+        item.setAttribute('data-dataset', name);
+        
+        const keys = dataset.data.length > 0 ? getAllFieldPaths(dataset.data) : [];
+        
+        // Create header with dropdown arrow
+        const header = document.createElement('div');
+        header.className = 'saved-data-header';
+        header.onclick = () => toggleDatasetDropdown(name);
+        
+        header.innerHTML = `
+          <div class="dropdown-arrow">▶</div>
+          <div class="saved-data-info">
+            <div class="saved-data-name">${name}</div>
+            <div class="saved-data-details">${dataset.data.length} records, ${getUniquePropertyCount(dataset.data)} properties</div>
+          </div>
+          <div class="saved-data-actions">
+            <button class="apply-btn" onclick="event.stopPropagation(); applyDataset(savedDatasets['${name}'].data)">Apply All</button>
+            <button class="delete-btn" onclick="event.stopPropagation(); showDeleteModal('${name}')">Delete</button>
+          </div>
+        `;
+        
+        // Create dropdown rows container
+        const rowsContainer = document.createElement('div');
+        rowsContainer.className = 'saved-data-rows';
+        
+        // Create individual rows
+        dataset.data.forEach((rowData, index) => {
+          const row = document.createElement('div');
+          row.className = 'data-row';
+          
+          // Create content showing only the first field value as identifier
+          const content = document.createElement('div');
+          content.className = 'data-row-content';
+          
+          // Use actual first key from original JSON structure as identifier
+          const originalKeys = Object.keys(rowData); // Get keys in original order
+          const firstField = originalKeys.length > 0 ? originalKeys[0] : null;
+          let identifier = `Record ${index + 1}`; // Fallback identifier
+          
+          if (firstField) {
+            const value = getValueByPath(rowData, firstField);
+            if (value && value.trim() !== '') {
+              identifier = String(value);
+            }
+          }
+          
+          const identifierDiv = document.createElement('div');
+          identifierDiv.className = 'data-field';
+          identifierDiv.style.fontWeight = '500';
+          identifierDiv.style.color = '#333';
+          identifierDiv.textContent = identifier;
+          content.appendChild(identifierDiv);
+          
+          // Create apply button for this row
+          const applyBtn = document.createElement('button');
+          applyBtn.className = 'apply-btn';
+          applyBtn.textContent = 'Apply';
+          applyBtn.onclick = (e) => {
+            e.stopPropagation();
+            applySingleRow(rowData);
+          };
+          
+          row.appendChild(content);
+          row.appendChild(applyBtn);
+          rowsContainer.appendChild(row);
+        });
+        
+        item.appendChild(header);
+        item.appendChild(rowsContainer);
+        listContainer.appendChild(item);
+      });
+    }
+    
+    // Show save modal
+    function showSaveModal() {
+      document.getElementById('saveDataModal').style.display = 'block';
+      document.getElementById('datasetName').value = '';
+      document.getElementById('datasetName').focus();
+    }
+    
+    // Hide save modal
+    function hideSaveModal() {
+      document.getElementById('saveDataModal').style.display = 'none';
+    }
+    
+    // Show delete confirmation modal
+    function showDeleteModal(datasetName) {
+      document.getElementById('deleteDatasetName').textContent = datasetName;
+      document.getElementById('deleteModal').style.display = 'block';
+      document.getElementById('deleteModal').dataset.targetName = datasetName;
+    }
+    
+    // Hide delete modal
+    function hideDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+    
+    // Tab switching functionality
+    function switchTab(tabName) {
+      console.log('📑 Switching to tab:', tabName);
+      
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active from all tab buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabName + 'Content').classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      // Refresh data tab when switching to it
+      if (tabName === 'data') {
+        renderSavedDatasets();
+      }
+      
+      // Refresh map data tab when switching to it
+      if (tabName === 'mapData') {
+        renderMappingDatasets();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 DOM loaded - setting up event listeners');
+      
+      // Tab button event listeners
+      document.getElementById('dataTab').onclick = () => switchTab('data');
+      document.getElementById('addDataTab').onclick = () => switchTab('addData');
+      document.getElementById('mapDataTab').onclick = () => switchTab('mapData');
+      document.getElementById('instructionsTab').onclick = () => switchTab('instructions');
+      
+      // Validate button
+      document.getElementById('validateButton').onclick = () => {
+        console.log('🔍 Validate Data button clicked');
+        validateData();
+      };
+      
+      // Save Data button
+      document.getElementById('saveDataButton').onclick = () => {
+        if (Object.keys(savedDatasets).length >= MAX_DATASETS) {
+          showStatus(`Maximum ${MAX_DATASETS} datasets allowed. Delete some first.`, 'error');
+          return;
+        }
+        
+        if (!validatedData) {
+          showStatus('Please validate data first', 'error');
+          return;
+        }
+        
+        if (!isInputValidated()) {
+          showStatus('Data has changed. Please validate again.', 'error');
+          clearValidatedData();
+          return;
+        }
+        
+        showSaveModal();
+      };
+      
+      // Modal event listeners
+      document.getElementById('cancelSave').onclick = hideSaveModal;
+      document.getElementById('confirmSave').onclick = () => {
+        const name = document.getElementById('datasetName').value.trim();
+        if (!name) {
+          showStatus('Please enter a dataset name', 'error');
+          return;
+        }
+        if (savedDatasets[name]) {
+          showStatus('Dataset name already exists', 'error');
+          return;
+        }
+        
+        saveDataset(name, validatedData);
+        hideSaveModal();
+      };
+      
+      document.getElementById('cancelDelete').onclick = hideDeleteModal;
+      document.getElementById('confirmDelete').onclick = () => {
+        const targetName = document.getElementById('deleteModal').dataset.targetName;
+        deleteDataset(targetName);
+        hideDeleteModal();
+      };
+      
+      // Mapping modal event listeners
+      document.getElementById('cancelMapping').onclick = hideMappingModal;
+      document.getElementById('confirmMapping').onclick = processMapping;
+      
+      // Allow Enter key in dataset name input
+      document.getElementById('datasetName').onkeypress = (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('confirmSave').click();
+        }
+      };
+      
+      // Close modals when clicking outside
+      document.getElementById('saveDataModal').onclick = (e) => {
+        if (e.target.id === 'saveDataModal') hideSaveModal();
+      };
+      document.getElementById('deleteModal').onclick = (e) => {
+        if (e.target.id === 'deleteModal') hideDeleteModal();
+      };
+      document.getElementById('mapDataModal').onclick = (e) => {
+        if (e.target.id === 'mapDataModal') hideMappingModal();
+      };
+      
+      // Input field monitoring to clear validated state on changes
+      document.getElementById('dataInput').addEventListener('input', () => {
+        if (!isInputValidated()) {
+          clearValidatedData();
+          
+          // Only show the message if user is on Add Data tab
+          const addDataTab = document.getElementById('addDataContent');
+          if (addDataTab && addDataTab.classList.contains('active')) {
+            showStatus('Data changed. Please validate again.', 'info');
+          }
+        }
+      });
+      
+      // Process button
+      document.getElementById('processButton').onclick = () => {
+        if (!validatedData) {
+          showStatus('Please validate data first', 'error');
+          return;
+        }
+        
+        if (!isInputValidated()) {
+          showStatus('Data has changed. Please validate again.', 'error');
+          clearValidatedData();
+          return;
+        }
+        
+        console.log('🔄 Processing data...');
+        parent.postMessage({
+          pluginMessage: {
+            type: 'process-content-swap',
+            data: validatedData
+          }
+        }, '*');
+      };
+      
+      // Close button
+      document.getElementById('closeButton').onclick = () => {
+        parent.postMessage({
+          pluginMessage: { type: 'close' }
+        }, '*');
+      };
+      
+      // Start on Data tab by default
+      switchTab('data');
+      
+      // Load saved datasets on startup
+      loadSavedDatasets();
+      
+      console.log('✅ All event listeners set up!');
+    });
+    
+    // Listen for messages from plugin
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      
+      if (msg.type === 'processing-complete') {
+        document.getElementById('processButton').disabled = false;
+        document.getElementById('processButton').textContent = 'Process Data';
+        
+        if (msg.success) {
+          showStatus(msg.message || 'Content swapped successfully!', 'success');
+        } else {
+          showStatus(msg.message || 'Processing failed', 'error');
+        }
+      }
+      
+      if (msg.type === 'datasets-loaded') {
+        savedDatasets = msg.datasets || {};
+        renderSavedDatasets();
+        console.log('Loaded datasets:', Object.keys(savedDatasets));
+      }
+      
+      if (msg.type === 'dataset-saved') {
+        if (msg.success) {
+          savedDatasets[msg.name] = { data: msg.data };
+          showStatus(`Dataset "${msg.name}" saved successfully!`, 'success');
+          
+          // Hide Save Data button after successful save
+          document.getElementById('saveDataButton').style.display = 'none';
+          
+          // Refresh data tab if it's active
+          if (document.getElementById('dataContent').classList.contains('active')) {
+            renderSavedDatasets();
+          }
+        } else {
+          showStatus(msg.message || 'Failed to save dataset', 'error');
+        }
+      }
+      
+      if (msg.type === 'dataset-deleted') {
+        if (msg.success) {
+          delete savedDatasets[msg.name];
+          showStatus(`Dataset "${msg.name}" deleted`, 'success');
+          renderSavedDatasets();
+          
+          // Show Save Data button again if under limit and data is validated
+          if (validatedData && Object.keys(savedDatasets).length < MAX_DATASETS) {
+            const saveButton = document.getElementById('saveDataButton');
+            saveButton.style.display = 'inline-block';
+            saveButton.disabled = false;
+          }
+        } else {
+          showStatus(msg.message || 'Failed to delete dataset', 'error');
+        }
+      }
+      
+      if (msg.type === 'text-found-for-mapping') {
+        if (msg.success) {
+          const datasetFields = getUniquePropertyNames(savedDatasets[msg.datasetName].data);
+          showMappingModal(msg.datasetName, msg.layerItems, datasetFields);
+        } else {
+          showStatus(msg.message || 'Failed to find layer data', 'error');
+        }
+      }
+      
+      if (msg.type === 'mapping-complete') {
+        if (msg.success) {
+          showStatus(msg.message || 'Layer names updated successfully!', 'success');
+        } else {
+          showStatus(msg.message || 'Mapping failed', 'error');
+        }
+      }
+    };
+  </script>
+
+</body>
+</html> 

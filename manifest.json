@@ -1,0 +1,9 @@
+{
+  "name": "Content Swapper",
+  "id": "new-plugin",
+  "api": "1.0.0",
+  "main": "code2.js",
+  "capabilities": [],
+  "editorType": ["figma"],
+  "ui": "ui.html"
+} 
