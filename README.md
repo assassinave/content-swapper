@@ -1,16 +1,15 @@
 # The Replacer - Figma Plugin
 
-**Automatically replace text content in your Figma designs using JSON data**
+**Automatically replace text content in your Figma designs using JSON, CSV and TSV data**
 
-The Replacer is a powerful Figma plugin that lets you quickly swap out placeholder text in your designs with real data from JSON files. Perfect for creating personalized resumes, cards, profiles, or any design that needs dynamic content updates.
+The Replacer is a powerful Figma plugin that lets you quickly swap text in your designs with your own datasets. Perfect for creating personalized resumes, cards, profiles, or any design that needs dynamic content updates.
 
 ## ✨ What It Does
 
-- **🔄 Bulk Content Replacement**: Replace multiple text fields at once with JSON data
-- **🎯 Smart Pattern Detection**: Automatically detects similar design patterns and applies data accordingly  
+- **🔄 Bulk Content Replacement**: Replace multiple text fields at once
+- **🎯 Smart Pattern Detection**: Automatically detects similarly named layers and applies to all instances accordingly  
 - **📋 Dataset Management**: Save and reuse frequently used data sets
 - **🔗 Nested Data Support**: Handle complex JSON structures with arrays and nested objects
-- **⚡ Instant Preview**: See your changes applied immediately
 
 ## 🚀 Installation (Development Plugin)
 
