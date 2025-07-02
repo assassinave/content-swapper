@@ -399,11 +399,33 @@ function assignDataToNodes(inventory, data, dataStructure) {
   return assignments;
 }
 
+// Utility: Check if all selected nodes are group or frame
+function isSelectionGroupedOrFramed(selection) {
+  if (!selection || selection.length === 0) return false;
+  let allValid = true;
+  selection.forEach(node => {
+    const isValid = node.type === 'FRAME' || node.type === 'GROUP';
+    console.log(`Selection check: name="${node.name}", id=${node.id}, type=${node.type} => ${isValid ? 'VALID (group/frame)' : 'INVALID (not group/frame)'}`);
+    if (!isValid) allValid = false;
+  });
+  return allValid;
+}
+
 async function processContentSwapSimplified(data) {
   try {
     await saveData(data);
-    
     const originalSelection = figma.currentPage.selection;
+
+    // NEW: Require group or frame selection
+    if (!isSelectionGroupedOrFramed(originalSelection)) {
+      console.log('❌ Selection is not a group or frame. Error message will be triggered.');
+      figma.ui.postMessage({
+        type: 'processing-complete',
+        success: false,
+        message: 'Selected content must be inside a group or frame. This data cannot be reliably updated without being in a group or frame.'
+      });
+      return;
+    }
     
     if (originalSelection.length === 0) {
       figma.ui.postMessage({

@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Content Swapper</title>
+  <title>The Replacer</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,6 +21,11 @@
       font-size: 13px;
       font-weight: 600;
       color: #000;
+    }
+
+    p {
+      margin: 0 0 6px 0;
+      color: #6c757d;
     }
     
     label {
@@ -543,9 +548,7 @@
   </style>
 </head>
 <body>
-  <div class="section">
-    <h3>Content Swapper</h3>
-  </div>
+  
 
   <!-- Tab Navigation -->
   <div class="tab-nav">
@@ -558,11 +561,11 @@
   <!-- Content Tab -->
   <div id="dataContent" class="tab-content active">
     <div class="section">
-      <p style="margin: 0; font-size: 11px; color: #666;">
-        To update content, select a single frame or group or set of them and click Apply All. If you want to update using a single record, hit the dropdown and click Apply.
+      <p>
+        To update content, this plugin works best when content is grouped or within frames. It is not optimized to update individual layers using Apply All.
       </p>
-      <p style="margin: 0; font-size: 11px; color: #666;">
-        ❗️ Ensure you layers use the {{fieldname}} format before trying to update.
+      <p>
+        Ensure you have mapped your data in the Map Data tab or modified your layer names to {{fieldname}} format.
       </p>
     </div>
     
@@ -580,6 +583,9 @@
     <div class="section">
       <p style="margin: 0; font-size: 11px; color: #666;">
         Paste spreadsheet, CSV, or JSON data to add to your saved datasets
+      </p>
+      <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">
+        Here is an example of preferred JSON format <a href="#" id="viewJsonExampleLink" style="color: #18a0fb; text-decoration: underline; cursor: pointer;">(view)</a>
       </p>
     </div>
 
@@ -619,28 +625,28 @@
   <!-- Instructions Tab  -->
   <div id="instructionsContent" class="tab-content">
     <div class="info-box">
-      <h4>Step 1: Edit layer names</h4>
-      <p>Text layers must follow the format <code>{{layername}}</code></p>
-      <p>Example: <code>{{fullName}}</code>, <code>{{city}}</code>, <code>{{favoriteFruit}}</code></p>
-      <p class="info-sec">The layer name must match a field in your CSV, JSON or pasted data.</p>
-    </div>
-    
-    <div class="info-box">
-      <h4>Step 2: Add data</h4>
+      <h4>Step 1: Add data</h4>
       <p>1. Go to "Add Data" tab and paste your spreadsheet, CSV, or JSON data</p>
       <p>2. Click "Validate Data" to check your data</p>
       <p>3. Click "Save Data" and add a name to save your dataset</p>
-      <p class="info-sec">You can also utilize data temporarily by clicking Process Data without saving to your datasets</p>
     </div>
+
     
     <div class="info-box">
-      <h4>Step 3: Map Data (Alternative)</h4>
-      <p>Use Map Data to automatically rename multiple layers to {{fieldname}} format:</p>
-      <p>1. Select objects containing text layers with existing names</p>
+      <h4>Step 2: Map Layers to Data</h4>
+      <p>Use Map Data to automatically rename multiple layers to {{fieldname}} format for replacement</p>
+      <p>1. Select a frame or group containing text layers with existing names</p>
       <p>2. Go to "Map Data" tab and click "Find Data" for your saved dataset</p>
       <p>3. Map layer names to data fields (duplicates are grouped automatically)</p>
       <p>4. Click "Map Data" to batch rename all selected layers</p>
       <p class="info-sec">Perfect for components with duplicate layer names that need consistent field mapping</p>
+    </div>
+
+    <div class="info-box">
+      <h4>Step 3: Update Content</h4>
+      <p>1. Select frame or groups you want to update</p>
+      <p>2. To update all selected in sequential order, click Apply All</p>
+      <p>3. To update a single record, click the dropdown and select Apply</p>
     </div>
     
     <div class="info-box">
@@ -700,6 +706,40 @@
       <div class="mapping-modal-footer">
         <button id="cancelMapping" class="secondary">Cancel</button>
         <button id="confirmMapping" class="primary">Map Data</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JSON Example Modal -->
+  <div id="jsonExampleModal" class="modal">
+    <div class="modal-content" style="max-width: 520px; width: 90%;">
+      <h4>Preferred JSON Example</h4>
+      <pre style="font-size: 11px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 12px; overflow-x: auto; white-space: pre; margin-bottom: 16px;">
+[
+    {
+      "name": "Alex Rodriguez",
+      "gamertag": "ShadowHunter92",
+      "favoriteGames": [
+        { "game": "The Witcher 3: Wild Hunt" },
+        { "game": "Dark Souls III" },
+        { "game": "Cyberpunk 2077" },
+        { "game": "Elden Ring" }
+      ]
+    },
+    {
+      "name": "Sarah Chen",
+      "gamertag": "PixelNinja",
+      "favoriteGames": [
+        { "game": "Overwatch 2" },
+        { "game": "Valorant" },
+        { "game": "Apex Legends" },
+        { "game": "Counter-Strike 2" }
+      ]
+    }
+]
+      </pre>
+      <div class="modal-buttons">
+        <button id="closeJsonExampleModal" class="secondary">Close</button>
       </div>
     </div>
   </div>
@@ -1471,6 +1511,24 @@
       if (tabName === 'mapData') {
         renderMappingDatasets();
       }
+      
+      // Attach JSON example modal link when Add Data tab is activated
+      if (tabName === 'addData') {
+        const link = document.getElementById('viewJsonExampleLink');
+        if (link) {
+          link.onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('jsonExampleModal').style.display = 'block';
+          };
+        }
+        // Also attach close button event listener for the modal
+        const closeBtn = document.getElementById('closeJsonExampleModal');
+        if (closeBtn) {
+          closeBtn.onclick = () => {
+            document.getElementById('jsonExampleModal').style.display = 'none';
+          };
+        }
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1569,25 +1627,10 @@
       });
       
       // Process button
+      document.getElementById('processButton').disabled = true;
       document.getElementById('processButton').onclick = () => {
-        if (!validatedData) {
-          showStatus('Please validate data first', 'error');
-          return;
-        }
-        
-        if (!isInputValidated()) {
-          showStatus('Data has changed. Please validate again.', 'error');
-          clearValidatedData();
-          return;
-        }
-        
-        console.log('🔄 Processing data...');
-        parent.postMessage({
-          pluginMessage: {
-            type: 'process-content-swap',
-            data: validatedData
-          }
-        }, '*');
+        showStatus('Process Data is currently disabled. Please use Apply All from a saved dataset.', 'error');
+        return;
       };
       
       // Close button
@@ -1602,6 +1645,14 @@
       
       // Load saved datasets on startup
       loadSavedDatasets();
+      
+      // JSON Example Modal logic
+      document.getElementById('closeJsonExampleModal').onclick = () => {
+        document.getElementById('jsonExampleModal').style.display = 'none';
+      };
+      document.getElementById('jsonExampleModal').onclick = (e) => {
+        if (e.target.id === 'jsonExampleModal') document.getElementById('jsonExampleModal').style.display = 'none';
+      };
       
       console.log('✅ All event listeners set up!');
     });

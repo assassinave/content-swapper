@@ -1,8 +1,8 @@
 {
-  "name": "Content Swapper",
-  "id": "new-plugin",
+  "name": "The Replacer",
+  "id": "the-replacer",
   "api": "1.0.0",
-  "main": "code2.js",
+  "main": "code.js",
   "capabilities": [],
   "editorType": ["figma"],
   "ui": "ui.html"
